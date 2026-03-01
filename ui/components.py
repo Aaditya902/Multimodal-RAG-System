@@ -1,11 +1,8 @@
-"""Reusable UI components"""
-
 import streamlit as st
 from typing import List, Optional, Callable
 from models.result import SearchResult
 
 def metric_card(label: str, value: str, delta: Optional[str] = None, help_text: Optional[str] = None):
-    """Display a metric card"""
     
     col1, col2, col3 = st.columns([1, 2, 1])
     
@@ -18,7 +15,6 @@ def metric_card(label: str, value: str, delta: Optional[str] = None, help_text: 
         )
 
 def result_card(result: SearchResult, index: int):
-    """Display a single search result"""
     
     confidence_color = result.confidence_color
     
@@ -36,7 +32,6 @@ def result_card(result: SearchResult, index: int):
         st.divider()
 
 def file_badge(filename: str, file_type: str, size: Optional[int] = None):
-    """Display a file badge"""
     
     icons = {
         'pdf': '📄',
@@ -59,13 +54,11 @@ def file_badge(filename: str, file_type: str, size: Optional[int] = None):
     st.markdown(f"`{label}`")
 
 def progress_step(current: int, total: int, label: str = "Processing"):
-    """Display a progress step"""
     
     percent = int((current / total) * 100)
     return st.markdown(f"**{label}:** {current}/{total} ({percent}%)")
 
 def info_box(message: str, type: str = "info"):
-    """Display an info box with styling"""
     
     styles = {
         "info": {"icon": "ℹ️", "color": "blue"},
@@ -92,7 +85,6 @@ def info_box(message: str, type: str = "info"):
     )
 
 def action_button(label: str, on_click: Callable, icon: Optional[str] = None):
-    """Display an action button with icon"""
     
     button_label = f"{icon} {label}" if icon else label
     

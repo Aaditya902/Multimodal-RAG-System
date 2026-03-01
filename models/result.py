@@ -1,5 +1,3 @@
-"""Data model for search results"""
-
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, List
 from datetime import datetime
@@ -7,7 +5,6 @@ from .chunk import Chunk
 
 @dataclass
 class SearchResult:
-    """Represents a search result"""
     
     chunk: Chunk
     score: float
@@ -18,7 +15,6 @@ class SearchResult:
     
     @property
     def confidence_level(self) -> str:
-        """Get confidence level based on score"""
         if self.score > 0.7:
             return "high"
         elif self.score > 0.4:
@@ -28,7 +24,6 @@ class SearchResult:
     
     @property
     def confidence_color(self) -> str:
-        """Get color for confidence level"""
         return {
             "high": "green",
             "medium": "orange",
@@ -36,7 +31,6 @@ class SearchResult:
         }.get(self.confidence_level, "gray")
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
         return {
             'chunk': self.chunk.to_dict(),
             'score': self.score,
@@ -49,7 +43,6 @@ class SearchResult:
 
 @dataclass
 class SearchResponse:
-    """Represents a complete search response"""
     
     query: str
     results: List[SearchResult]
@@ -60,18 +53,15 @@ class SearchResponse:
     
     @property
     def top_result(self) -> Optional[SearchResult]:
-        """Get top result"""
         return self.results[0] if self.results else None
     
     @property
     def average_score(self) -> float:
-        """Get average score of results"""
         if not self.results:
             return 0.0
         return sum(r.score for r in self.results) / len(self.results)
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
         return {
             'query': self.query,
             'results': [r.to_dict() for r in self.results],

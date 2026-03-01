@@ -1,12 +1,9 @@
-"""Retriever factory for creating retriever instances"""
-
 from typing import Optional, Dict, Any
 from .base import BaseRetriever
 from .faiss_retriever import FAISSRetriever
 from core.embedding.factory import EmbeddingFactory
 
 class RetrieverFactory:
-    """Factory for creating retrievers"""
     
     _instances: Dict[str, BaseRetriever] = {}
     
@@ -37,7 +34,6 @@ class RetrieverFactory:
         if cache and cache_key in cls._instances:
             return cls._instances[cache_key]
         
-        # Create embedding model
         if embedding_model:
             embedder = EmbeddingFactory.create(
                 model_type='sentence_transformer',

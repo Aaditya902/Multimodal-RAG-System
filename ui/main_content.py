@@ -1,5 +1,3 @@
-"""Main content area UI"""
-
 import streamlit as st
 from datetime import datetime
 
@@ -7,7 +5,6 @@ from .components import result_card, file_badge, info_box
 from services.query_service import QueryService
 
 def render_main_content():
-    """Render the main content area"""
     
     col1, col2 = st.columns([1, 1])
     
@@ -18,19 +15,16 @@ def render_main_content():
         render_query_section()
 
 def render_file_section():
-    """Render the file management section"""
     
     st.header("📄 Processed Files")
     
     if st.session_state.get('processed_files'):
         st.success(f"✅ {len(st.session_state.processed_files)} files ready")
         
-        # File list
         with st.expander("View processed files"):
             for filename in st.session_state.processed_files:
                 file_badge(filename, 'pdf' if filename.endswith('.pdf') else 'other')
         
-        # Document stats
         if st.session_state.get('total_chunks'):
             st.metric(
                 "Total Chunks",
@@ -41,7 +35,6 @@ def render_file_section():
         info_box("No files processed yet. Upload files using the sidebar.", "info")
 
 def render_query_section():
-    """Render the query/QA section"""
     
     st.header("💬 Ask Questions")
     
@@ -49,7 +42,6 @@ def render_query_section():
         info_box("👈 Upload files to start asking questions", "info")
         return
     
-    # Query input
     query = st.text_area(
         "Your question:",
         placeholder="What would you like to know about your documents?",
@@ -57,7 +49,6 @@ def render_query_section():
         key="query_input"
     )
     
-    # Additional options
     with st.expander("⚙️ Query Options"):
         col1, col2 = st.columns(2)
         
@@ -78,7 +69,6 @@ def render_query_section():
                 step=0.1
             )
     
-    # Submit button
     if st.button("🔍 Get Answer", type="primary", use_container_width=True):
         if not query.strip():
             info_box("Please enter a question", "warning")
@@ -87,25 +77,21 @@ def render_query_section():
         process_query(query, max_results, threshold)
 
 def process_query(query: str, max_results: int, threshold: float):
-    """Process and display query results"""
     
     if not st.session_state.get('query_service'):
         info_box("Query service not initialized", "error")
         return
     
     with st.spinner("🤔 Thinking..."):
-        # Get answer
         result = st.session_state.query_service.answer(
             query,
             k=max_results,
             threshold=threshold
         )
     
-    # Display answer
     st.markdown("### 📝 Answer")
     st.markdown(result['answer'])
     
-    # Display metadata
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -117,7 +103,6 @@ def process_query(query: str, max_results: int, threshold: float):
     with col3:
         st.metric("Model", result['model'].split('/')[-1])
     
-    # Display sources
     if result['sources']:
         with st.expander(f"🔍 View Sources ({len(result['sources'])})"):
             for i, source in enumerate(result['sources'], 1):
@@ -125,14 +110,12 @@ def process_query(query: str, max_results: int, threshold: float):
                 st.markdown(source['preview'])
                 st.divider()
     
-    # Display detailed results
     if result['results']:
         with st.expander("📊 Detailed Results"):
             for i, res in enumerate(result['results'], 1):
                 from models.result import SearchResult
                 from models.chunk import Chunk
                 
-                # Reconstruct objects (simplified)
                 chunk = Chunk(
                     content=res['chunk']['content'],
                     source_file=res['chunk']['source_file'],

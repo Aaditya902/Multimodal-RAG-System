@@ -1,5 +1,3 @@
-"""Time and timing utilities"""
-
 import time
 from datetime import datetime, timedelta
 from contextlib import contextmanager
@@ -7,7 +5,6 @@ from typing import Optional, Dict, Any
 import streamlit as st
 
 class Timer:
-    """Simple timer for measuring execution time"""
     
     def __init__(self):
         self.start_time = None
@@ -15,26 +12,22 @@ class Timer:
         self.elapsed = None
     
     def start(self):
-        """Start the timer"""
         self.start_time = time.time()
         return self
     
     def stop(self):
-        """Stop the timer"""
         if self.start_time is not None:
             self.end_time = time.time()
             self.elapsed = self.end_time - self.start_time
         return self.elapsed
     
     def reset(self):
-        """Reset the timer"""
         self.start_time = None
         self.end_time = None
         self.elapsed = None
     
     @property
     def current(self) -> Optional[float]:
-        """Get current elapsed time without stopping"""
         if self.start_time is not None:
             return time.time() - self.start_time
         return None
@@ -47,7 +40,6 @@ class Timer:
 
 @contextmanager
 def timing(label: str = "Operation", log: bool = True):
-    """Context manager for timing operations"""
     
     timer = Timer()
     timer.start()
@@ -64,12 +56,10 @@ def timing(label: str = "Operation", log: bool = True):
                 'timestamp': datetime.now()
             })
             
-            # Keep only last 100 timings
             if len(st.session_state.timings) > 100:
                 st.session_state.timings = st.session_state.timings[-100:]
 
 def format_duration(seconds: float) -> str:
-    """Format duration in human-readable format"""
     
     if seconds < 0.001:
         return f"{seconds*1000000:.1f}µs"
@@ -85,7 +75,6 @@ def format_duration(seconds: float) -> str:
         return f"{hours:.1f}h"
 
 def get_time_ago(timestamp: datetime) -> str:
-    """Get human-readable time ago string"""
     
     now = datetime.now()
     diff = now - timestamp
@@ -108,14 +97,12 @@ def get_time_ago(timestamp: datetime) -> str:
         return f"{diff.seconds} seconds ago"
 
 def get_performance_summary() -> Dict[str, Any]:
-    """Get summary of recent timings"""
     
     timings = st.session_state.get('timings', [])
     
     if not timings:
         return {'total_operations': 0}
     
-    # Calculate statistics
     operations = {}
     for t in timings:
         label = t['label']
@@ -142,7 +129,6 @@ def get_performance_summary() -> Dict[str, Any]:
     return summary
 
 def wait_with_progress(seconds: float, message: str = "Waiting..."):
-    """Wait with progress bar"""
     
     progress_bar = st.progress(0)
     steps = 20
@@ -154,7 +140,6 @@ def wait_with_progress(seconds: float, message: str = "Waiting..."):
     progress_bar.empty()
 
 def retry_with_backoff(func, max_retries: int = 3, initial_delay: float = 1.0):
-    """Retry function with exponential backoff"""
     
     delay = initial_delay
     
@@ -166,6 +151,6 @@ def retry_with_backoff(func, max_retries: int = 3, initial_delay: float = 1.0):
                 raise e
             
             time.sleep(delay)
-            delay *= 2  # Exponential backoff
+            delay *= 2 
     
     return None

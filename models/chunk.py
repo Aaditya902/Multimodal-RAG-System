@@ -1,5 +1,3 @@
-"""Data model for document chunks"""
-
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -7,7 +5,6 @@ import hashlib
 
 @dataclass
 class Chunk:
-    """Represents a chunk of text from a document"""
     
     content: str
     source_file: str
@@ -18,26 +15,21 @@ class Chunk:
     created_at: datetime = field(default_factory=datetime.now)
     
     def __post_init__(self):
-        """Generate unique ID after initialization"""
         self.id = self._generate_id()
     
     def _generate_id(self) -> str:
-        """Generate unique ID for chunk"""
         content_hash = hashlib.md5(self.content.encode()).hexdigest()[:8]
         return f"{self.source_file}_{self.chunk_index}_{content_hash}"
     
     @property
     def preview(self) -> str:
-        """Get preview of content"""
         return self.content[:200] + "..." if len(self.content) > 200 else self.content
     
     @property
     def size(self) -> int:
-        """Get content size in characters"""
         return len(self.content)
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
         return {
             'id': self.id,
             'content': self.content,
@@ -53,7 +45,6 @@ class Chunk:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Chunk':
-        """Create from dictionary"""
         return cls(
             content=data['content'],
             source_file=data['source_file'],

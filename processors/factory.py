@@ -1,6 +1,4 @@
-"""Processor factory for creating file processors"""
-
-from typing import Dict, List, Optional  # Add this import
+from typing import Dict, List, Optional  
 from .base import BaseProcessor
 from .pdf_processor import PDFProcessor
 from .image_processor import ImageProcessor
@@ -31,7 +29,6 @@ class ProcessorFactory:
         
         processor = self._processors.get(file_type.lower())
         
-        # Inject dependencies if needed
         if processor and kwargs:
             if 'gemini_client' in kwargs and hasattr(processor, 'set_gemini_client'):
                 processor.set_gemini_client(kwargs['gemini_client'])

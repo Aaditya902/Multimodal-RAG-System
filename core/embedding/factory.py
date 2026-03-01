@@ -1,11 +1,9 @@
-"""Embedding factory for creating embedding instances"""
 
 from typing import Optional, Dict, Any
 from .base import BaseEmbedding
 from .sentence_transformer import SentenceTransformerEmbedding
 
 class EmbeddingFactory:
-    """Factory for creating embedding models"""
     
     _instances: Dict[str, BaseEmbedding] = {}
     
@@ -15,18 +13,7 @@ class EmbeddingFactory:
                model_name: Optional[str] = None,
                cache: bool = True,
                **kwargs) -> BaseEmbedding:
-        """
-        Create an embedding model instance
-        
-        Args:
-            model_type: Type of embedding model
-            model_name: Specific model name
-            cache: Whether to cache the instance
-            **kwargs: Additional arguments
-        
-        Returns:
-            BaseEmbedding instance
-        """
+
         cache_key = f"{model_type}:{model_name}"
         
         if cache and cache_key in cls._instances:
@@ -46,5 +33,4 @@ class EmbeddingFactory:
     
     @classmethod
     def clear_cache(cls):
-        """Clear all cached instances"""
         cls._instances.clear()

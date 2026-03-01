@@ -1,5 +1,3 @@
-"""Processor for plain text files"""
-
 from typing import List
 import streamlit as st
 
@@ -7,18 +5,15 @@ from .base import BaseProcessor
 from models.chunk import Chunk
 
 class TextProcessor(BaseProcessor):
-    """Process plain text files"""
     
     def __init__(self):
         self._extensions = ['.txt', '.md', '.rtf']
     
     def process(self, file_path: str, source_name: str) -> List[Chunk]:
-        """Process text file"""
         
         chunks = []
         
         try:
-            # Try different encodings
             encodings = ['utf-8', 'latin-1', 'cp1252']
             
             for encoding in encodings:
@@ -35,7 +30,6 @@ class TextProcessor(BaseProcessor):
             if text.strip():
                 chunks = self.chunk_text(text, source_name)
                 
-                # Add metadata
                 for chunk in chunks:
                     chunk.metadata['type'] = 'text'
                     chunk.metadata['encoding'] = encoding

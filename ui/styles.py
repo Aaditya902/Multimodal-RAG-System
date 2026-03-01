@@ -1,5 +1,3 @@
-"""Custom CSS styles for Streamlit app"""
-
 def load_css():
     """Load custom CSS styles"""
     
@@ -185,9 +183,7 @@ def load_css():
     """, unsafe_allow_html=True)
 
 def apply_custom_theme():
-    """Apply custom theme settings"""
     
-    # Configure Streamlit theme
     st.config.set_option('theme.primaryColor', '#1E88E5')
     st.config.set_option('theme.backgroundColor', '#FFFFFF')
     st.config.set_option('theme.secondaryBackgroundColor', '#F0F2F6')

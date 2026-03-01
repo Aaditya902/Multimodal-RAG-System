@@ -10,7 +10,6 @@ def render_sidebar(on_process: Callable, on_clear: Callable):
     with st.sidebar:
         st.header("📁 File Upload")
         
-        # File uploader
         uploaded_files = st.file_uploader(
             "Choose files",
             type=['pdf', 'png', 'jpg', 'jpeg', 'txt', 'docx', 'xlsx', 'pptx'],
@@ -18,25 +17,21 @@ def render_sidebar(on_process: Callable, on_clear: Callable):
             key="file_uploader"
         )
         
-        # Process button
         if uploaded_files:
             if st.button("🚀 Process Files", type="primary", use_container_width=True):
                 with st.spinner(f"Processing {len(uploaded_files)} files..."):
                     on_process(uploaded_files)
         
-        # Clear button
         if st.button("🗑️ Clear All", use_container_width=True):
             on_clear()
             st.rerun()
         
         st.divider()
         
-        # Usage statistics
         render_usage_stats()
         
         st.divider()
         
-        # Settings
         render_settings()
 
 def render_usage_stats():
@@ -69,17 +64,15 @@ def render_usage_stats():
             help="Total text chunks"
         )
     
-    # Calculate savings
     ocr_calls = st.session_state.get('ocr_calls', 0)
     if ocr_calls > 0:
-        savings = ocr_calls * 0.01  # Approx $0.01 per vision call
+        savings = ocr_calls * 0.01 
         st.success(f"💰 Saved ~${savings:.2f} using OCR!")
 
 def render_settings():
     """Render settings panel"""
     st.subheader("⚙️ Settings")
     
-    # Model selection
     models = ["models/gemini-2.5-flash", "models/gemini-2.5-pro"]
     selected_model = st.selectbox(
         "Gemini Model",
@@ -89,7 +82,6 @@ def render_settings():
     )
     st.session_state['selected_model'] = selected_model
     
-    # Threshold slider
     threshold = st.slider(
         "Similarity Threshold",
         min_value=0.1,
@@ -100,7 +92,6 @@ def render_settings():
     )
     st.session_state['similarity_threshold'] = threshold
     
-    # Max chunks
     max_chunks = st.number_input(
         "Max Results",
         min_value=1,
@@ -110,7 +101,6 @@ def render_settings():
     )
     st.session_state['max_chunks'] = max_chunks
     
-    # Reset stats button
     if st.button("🔄 Reset Stats", use_container_width=True):
         st.session_state['ocr_calls'] = 0
         st.session_state['gemini_vision_calls'] = 0

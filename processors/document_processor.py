@@ -1,5 +1,3 @@
-"""Enhanced processor for Word, Excel, PowerPoint with better data extraction"""
-
 from typing import List, Dict, Any
 import pandas as pd
 from docx import Document as DocxDocument
@@ -14,13 +12,11 @@ from .base import BaseProcessor
 from models.chunk import Chunk
 
 class DocumentProcessor(BaseProcessor):
-    """Enhanced document processor with better Excel handling"""
-    
+
     def __init__(self):
         self._extensions = ['.docx', '.doc', '.xlsx', '.xls', '.csv', '.pptx', '.ppt']
     
     def process(self, file_path: str, source_name: str) -> List[Chunk]:
-        """Process document based on extension"""
         
         _, ext = os.path.splitext(file_path)
         ext = ext.lower()
@@ -35,21 +31,17 @@ class DocumentProcessor(BaseProcessor):
             return []
     
     def _process_excel_enhanced(self, file_path: str, source_name: str) -> List[Chunk]:
-        """Enhanced Excel processing with better data extraction"""
         
         chunks = []
         
         try:
-            # Read Excel file
             if file_path.endswith('.csv'):
                 df = pd.read_csv(file_path)
                 sheet_name = "CSV Data"
             else:
-                # Get all sheet names
                 xl = pd.ExcelFile(file_path)
                 sheet_names = xl.sheet_names
                 
-                # Process each sheet
                 for sheet_idx, sheet_name in enumerate(sheet_names):
                     df = pd.read_excel(file_path, sheet_name=sheet_name)
                     sheet_chunks = self._process_dataframe(df, source_name, sheet_name, sheet_idx)
@@ -57,12 +49,10 @@ class DocumentProcessor(BaseProcessor):
                 
                 return chunks
             
-            # For CSV, process as single sheet
             chunks = self._process_dataframe(df, source_name, "CSV Data", 0)
             
         except Exception as e:
             st.warning(f"Excel processing failed: {str(e)}")
-            # Fallback to basic text extraction
             chunks = self._process_excel_basic(file_path, source_name)
         
         return chunks
@@ -73,7 +63,6 @@ class DocumentProcessor(BaseProcessor):
         
         chunks = []
         
-        # 1. Summary chunk
         summary = self._create_excel_summary(df, sheet_name)
         chunks.append(Chunk(
             content=summary,
@@ -88,7 +77,6 @@ class DocumentProcessor(BaseProcessor):
             }
         ))
         
-        # 2. Column information chunk
         col_info = self._create_column_info(df)
         chunks.append(Chunk(
             content=col_info,
@@ -101,11 +89,9 @@ class DocumentProcessor(BaseProcessor):
             }
         ))
         
-        # 3. Data chunks (split large dataframes)
         data_chunks = self._create_data_chunks(df, source_name, sheet_name)
         chunks.extend(data_chunks)
         
-        # 4. Statistical summary for numeric columns
         stats = self._create_statistical_summary(df)
         if stats:
             chunks.append(Chunk(
@@ -130,18 +116,15 @@ class DocumentProcessor(BaseProcessor):
         summary.append(f"Total Columns: {len(df.columns)}")
         summary.append(f"Column Names: {', '.join(df.columns)}")
         
-        # Data types
         dtypes = df.dtypes.value_counts()
         summary.append("\nData Types:")
         for dtype, count in dtypes.items():
             summary.append(f"  - {dtype}: {count} columns")
         
-        # Missing values
         missing = df.isnull().sum().sum()
         if missing > 0:
             summary.append(f"\nMissing Values: {missing}")
         
-        # Sample data (first 3 rows)
         summary.append("\nSample Data (First 3 rows):")
         sample = df.head(3).to_string()
         summary.append(sample)
@@ -163,7 +146,6 @@ class DocumentProcessor(BaseProcessor):
                 info.append(f"  Range: {df[col].min()} to {df[col].max()}")
                 info.append(f"  Mean: {df[col].mean():.2f}")
             
-            # Sample values
             sample_vals = df[col].dropna().head(3).tolist()
             if sample_vals:
                 info.append(f"  Sample: {sample_vals}")
@@ -183,12 +165,9 @@ class DocumentProcessor(BaseProcessor):
             end_row = min(start_row + chunk_size, total_rows)
             chunk_df = df.iloc[start_row:end_row]
             
-            # Convert to readable format
             if len(chunk_df) <= 20:
-                # For small chunks, show all data
                 data_str = chunk_df.to_string()
             else:
-                # For larger chunks, show summary
                 data_str = f"Rows {start_row+1}-{end_row} of {total_rows}:\n"
                 data_str += chunk_df.head(10).to_string()
                 data_str += f"\n... and {len(chunk_df)-10} more rows"
@@ -242,7 +221,7 @@ class DocumentProcessor(BaseProcessor):
                     reader = csv.reader(f)
                     rows = list(reader)
                     text = "CSV Data:\n"
-                    for row in rows[:100]:  # Limit to first 100 rows
+                    for row in rows[:100]:  
                         text += ' | '.join(row) + '\n'
             else:
                 wb = openpyxl.load_workbook(file_path, data_only=True)
@@ -276,12 +255,10 @@ class DocumentProcessor(BaseProcessor):
             doc = DocxDocument(file_path)
             text_parts = []
             
-            # Extract paragraphs
             for para in doc.paragraphs:
                 if para.text.strip():
                     text_parts.append(para.text)
             
-            # Extract tables
             for table in doc.tables:
                 table_text = ["Table:"]
                 for row in table.rows:
@@ -325,7 +302,6 @@ class DocumentProcessor(BaseProcessor):
                     if hasattr(shape, "text") and shape.text.strip():
                         slide_text.append(shape.text)
                     
-                    # Check for tables in PowerPoint
                     if hasattr(shape, "table"):
                         table_text = ["Table:"]
                         for row in shape.table.rows:

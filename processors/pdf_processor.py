@@ -1,5 +1,3 @@
-"""PDF processor with text and image extraction"""
-
 from typing import List, Optional
 import PyPDF2
 from pdf2image import convert_from_path
@@ -12,7 +10,6 @@ from .image_processor import ImageProcessor
 from models.chunk import Chunk
 
 class PDFProcessor(BaseProcessor):
-    """Process PDF files including images within them"""
     
     def __init__(self, gemini_client=None):
         self.gemini_client = gemini_client
@@ -20,31 +17,26 @@ class PDFProcessor(BaseProcessor):
         self._extensions = ['.pdf']
     
     def set_gemini_client(self, client):
-        """Set Gemini client"""
         self.gemini_client = client
         self.image_processor.set_gemini_client(client)
     
     def set_ocr_engine(self, engine):
-        """Set OCR engine"""
         self.image_processor.set_ocr_engine(engine)
     
     def process(self, file_path: str, source_name: str) -> List[Chunk]:
-        """Process PDF file"""
         return self.process_pdf(file_path, source_name)
     
     def process_pdf(self, file_path: str, source_name: str) -> List[Chunk]:
-        """Process PDF and extract text + images"""
         
         all_chunks = []
         ocr_pages = 0
-        max_ocr_pages = 10  # Limit OCR to save time
+        max_ocr_pages = 10  
         
         try:
             with open(file_path, 'rb') as file:
                 reader = PyPDF2.PdfReader(file)
                 
                 for page_num, page in enumerate(reader.pages):
-                    # Extract text from PDF
                     page_text = page.extract_text()
                     
                     if page_text and page_text.strip():
@@ -58,7 +50,6 @@ class PDFProcessor(BaseProcessor):
                         )
                         all_chunks.append(chunk)
                     
-                    # Check if page needs OCR (images or little text)
                     text_length = len(page_text.strip()) if page_text else 0
                     has_images = self._page_has_images(page)
                     
@@ -73,7 +64,6 @@ class PDFProcessor(BaseProcessor):
         return all_chunks
     
     def _page_has_images(self, page) -> bool:
-        """Check if PDF page contains images"""
         try:
             if '/Resources' in page and '/XObject' in page['/Resources']:
                 xObject = page['/Resources']['/XObject'].get_object()
@@ -85,11 +75,9 @@ class PDFProcessor(BaseProcessor):
         return False
     
     def _ocr_pdf_page(self, pdf_path: str, page_num: int, source_name: str) -> List[Chunk]:
-        """Convert PDF page to image and run OCR"""
         chunks = []
         
         try:
-            # Convert page to image
             images = convert_from_path(
                 pdf_path,
                 first_page=page_num + 1,
@@ -100,22 +88,18 @@ class PDFProcessor(BaseProcessor):
             if not images:
                 return chunks
             
-            # Save temp image
             with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
                 images[0].save(tmp.name)
                 tmp_path = tmp.name
             
-            # Process with image processor
             image_chunks = self.image_processor.process(tmp_path, f"{source_name}_page{page_num+1}")
             
-            # Update metadata for each chunk
             for chunk in image_chunks:
                 chunk.metadata['source'] = 'pdf_ocr'
                 chunk.metadata['page'] = page_num + 1
                 chunk.page_number = page_num + 1
                 chunks.append(chunk)
             
-            # Cleanup
             os.unlink(tmp_path)
             
         except Exception as e:

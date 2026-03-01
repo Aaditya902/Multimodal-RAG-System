@@ -1,5 +1,3 @@
-"""Data model for documents"""
-
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -7,7 +5,6 @@ from .chunk import Chunk
 
 @dataclass
 class Document:
-    """Represents a processed document"""
     
     file_name: str
     file_path: str
@@ -19,24 +16,19 @@ class Document:
     
     @property
     def total_chunks(self) -> int:
-        """Get total number of chunks"""
         return len(self.chunks)
     
     @property
     def total_size(self) -> int:
-        """Get total size in characters"""
         return sum(chunk.size for chunk in self.chunks)
     
     def add_chunk(self, chunk: Chunk):
-        """Add a chunk to document"""
         self.chunks.append(chunk)
     
     def get_chunks_by_page(self, page_number: int) -> List[Chunk]:
-        """Get chunks from specific page"""
         return [c for c in self.chunks if c.page_number == page_number]
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
         return {
             'file_name': self.file_name,
             'file_path': self.file_path,
@@ -51,7 +43,6 @@ class Document:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Document':
-        """Create from dictionary"""
         doc = cls(
             file_name=data['file_name'],
             file_path=data['file_path'],

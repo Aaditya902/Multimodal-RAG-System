@@ -1,31 +1,24 @@
-"""Base processor interface"""
-
 from abc import ABC, abstractmethod
-from typing import List, Optional, Any  # Add this import
+from typing import List, Optional, Any  
 from models.chunk import Chunk
 
 class BaseProcessor(ABC):
-    """Abstract base class for all file processors"""
     
     @abstractmethod
     def process(self, file_path: str, source_name: str) -> List[Chunk]:
-        """Process file and return chunks"""
         pass
     
     @abstractmethod
     def supports(self, file_type: str) -> bool:
-        """Check if processor supports file type"""
         pass
     
     @property
     @abstractmethod
     def supported_extensions(self) -> List[str]:
-        """Get list of supported file extensions"""
         pass
     
     def chunk_text(self, text: str, source_name: str, 
                    max_size: int = 1000, overlap: bool = True) -> List[Chunk]:
-        """Split text into chunks"""
         
         chunks = []
         sentences = text.replace('\n', ' ').split('. ')
@@ -56,7 +49,6 @@ class BaseProcessor(ABC):
             current_chunk.append(sentence)
             current_length += sentence_length + 1
         
-        # Add last chunk
         if current_chunk:
             chunk_text = ' '.join(current_chunk)
             chunks.append(Chunk(
@@ -66,7 +58,6 @@ class BaseProcessor(ABC):
                 chunk_index=len(chunks)
             ))
         
-        # Create overlapping chunks if requested
         if overlap and len(chunks) > 1:
             overlapping = []
             for i in range(len(chunks) - 1):

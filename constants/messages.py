@@ -1,6 +1,3 @@
-"""User-facing messages and prompts"""
-
-# Error messages
 ERRORS = {
     'no_api_key': "⚠️ Google API key not found. Please set GOOGLE_API_KEY in your .env file",
     'no_file': "⚠️ Please upload at least one file",
@@ -13,7 +10,6 @@ ERRORS = {
     'unsupported_type': "❌ Unsupported file type: {file_type}",
 }
 
-# Success messages
 SUCCESS = {
     'files_processed': "✅ Processed {count} files with {chunks} chunks",
     'file_uploaded': "✅ Uploaded: {filename}",
@@ -21,7 +17,6 @@ SUCCESS = {
     'api_connected': "✅ Successfully connected to Gemini API",
 }
 
-# Info messages
 INFO = {
     'welcome': "Upload any file - PDF, Images, Word, Excel - and ask questions!",
     'no_files': "👈 Upload files to start asking questions",
@@ -30,7 +25,6 @@ INFO = {
     'searching': "🔍 Searching documents...",
 }
 
-# Prompts for Gemini
 PROMPTS = {
     'qa_system': """You are a helpful assistant that answers questions based on provided documents.
 
@@ -68,7 +62,6 @@ Provide a concise summary covering the main points:
 SUMMARY:""",
 }
 
-# UI Text
 UI = {
     'app_title': "🔄 Multimodal RAG System with Gemini",
     'upload_header': "📁 File Upload",
@@ -84,7 +77,6 @@ UI = {
     'reset_stats': "🔄 Reset Stats",
 }
 
-# Tooltips/Help text
 HELP = {
     'threshold': "Lower = more results, Higher = stricter matching",
     'model': "Select which Gemini model to use",

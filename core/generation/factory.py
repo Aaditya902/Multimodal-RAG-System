@@ -1,11 +1,8 @@
-"""Generator factory for creating generator instances"""
-
 from typing import Optional, Dict, Any
 from .base import BaseGenerator
 from .gemini_generator import GeminiGenerator
 
 class GeneratorFactory:
-    """Factory for creating answer generators"""
     
     _instances: Dict[str, BaseGenerator] = {}
     
@@ -16,19 +13,7 @@ class GeneratorFactory:
                model_name: Optional[str] = None,
                cache: bool = True,
                **kwargs) -> Optional[BaseGenerator]:
-        """
-        Create a generator instance
-        
-        Args:
-            generator_type: Type of generator ('gemini', 'mock', etc.)
-            client: API client (for Gemini)
-            model_name: Specific model name
-            cache: Whether to cache the instance
-            **kwargs: Additional arguments
-        
-        Returns:
-            BaseGenerator instance or None if creation fails
-        """
+
         cache_key = f"{generator_type}:{model_name}"
         
         if cache and cache_key in cls._instances:
@@ -53,11 +38,9 @@ class GeneratorFactory:
     
     @classmethod
     def clear_cache(cls):
-        """Clear all cached instances"""
         cls._instances.clear()
 
 class MockGenerator(BaseGenerator):
-    """Mock generator for testing"""
     
     def __init__(self, **kwargs):
         self._model_name = kwargs.get('model_name', 'mock-model')

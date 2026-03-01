@@ -1,11 +1,8 @@
-"""OCR factory for creating OCR engines"""
-
 from typing import Optional, Dict, Any, List
 from .base import BaseOCR
 from .easyocr_engine import EasyOCREngine
 
 class OCRFactory:
-    """Factory for creating OCR engines"""
     
     _instances: Dict[str, BaseOCR] = {}
     
@@ -16,19 +13,7 @@ class OCRFactory:
                gpu: bool = False,
                cache: bool = True,
                **kwargs) -> Optional[BaseOCR]:
-        """
-        Create an OCR engine instance
-        
-        Args:
-            engine_type: Type of OCR engine ('easyocr', 'tesseract', etc.)
-            languages: List of language codes
-            gpu: Whether to use GPU
-            cache: Whether to cache the instance
-            **kwargs: Additional arguments
-        
-        Returns:
-            BaseOCR instance or None if creation fails
-        """
+
         if languages is None:
             languages = ['en']
         
@@ -47,7 +32,6 @@ class OCRFactory:
         else:
             raise ValueError(f"Unknown OCR engine type: {engine_type}")
         
-        # Only cache if available
         if cache and instance and instance.is_available():
             cls._instances[cache_key] = instance
         
@@ -58,14 +42,12 @@ class OCRFactory:
         """Check availability of all OCR engines"""
         engines = {}
         
-        # Check EasyOCR
         try:
             easyocr = cls.create('easyocr', cache=False)
             engines['easyocr'] = easyocr.is_available() if easyocr else False
         except:
             engines['easyocr'] = False
         
-        # Check Tesseract
         try:
             tesseract = cls.create('tesseract', cache=False)
             engines['tesseract'] = tesseract.is_available() if tesseract else False

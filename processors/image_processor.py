@@ -1,5 +1,3 @@
-"""Enhanced Image processor with better OCR and multiple fallback methods"""
-
 from typing import List, Optional
 import streamlit as st
 import os
@@ -13,7 +11,6 @@ from models.chunk import Chunk
 from ocr.factory import OCRFactory
 
 class ImageProcessor(BaseProcessor):
-    """Enhanced image processor with multiple OCR methods"""
     
     def __init__(self, gemini_client=None):
         self.gemini_client = gemini_client
@@ -22,8 +19,6 @@ class ImageProcessor(BaseProcessor):
         self._initialize_ocr()
     
     def _initialize_ocr(self):
-        """Initialize OCR engines with fallback"""
-        # Try EasyOCR first
         try:
             self.ocr_engine = OCRFactory.create('easyocr', cache=True)
             if self.ocr_engine and self.ocr_engine.is_available():
@@ -32,10 +27,8 @@ class ImageProcessor(BaseProcessor):
         except Exception as e:
             st.warning(f"EasyOCR initialization failed: {str(e)}")
         
-        # Fallback to Tesseract
         try:
             import pytesseract
-            # Test Tesseract
             pytesseract.get_tesseract_version()
             self.use_tesseract = True
             st.success("✅ Tesseract OCR initialized successfully")
@@ -44,18 +37,14 @@ class ImageProcessor(BaseProcessor):
             st.warning("⚠️ No OCR engine available. Install EasyOCR or Tesseract.")
     
     def set_gemini_client(self, client):
-        """Set Gemini client for advanced image analysis"""
         self.gemini_client = client
     
     def process(self, file_path: str, source_name: str) -> List[Chunk]:
-        """Process image file with enhanced OCR"""
         
         chunks = []
         
-        # Step 1: Preprocess image for better OCR
         preprocessed_path = self._preprocess_image(file_path)
         
-        # Step 2: Extract text with multiple OCR methods
         ocr_text = self._extract_text_with_multiple_engines(preprocessed_path)
         
         if ocr_text:
@@ -68,10 +57,8 @@ class ImageProcessor(BaseProcessor):
             )
             chunks.append(chunk)
             
-            # Track OCR usage
             st.session_state['ocr_calls'] = st.session_state.get('ocr_calls', 0) + 1
         
-        # Step 3: Extract image metadata
         metadata = self._extract_image_metadata(file_path)
         if metadata:
             meta_chunk = Chunk(
@@ -83,7 +70,6 @@ class ImageProcessor(BaseProcessor):
             )
             chunks.append(meta_chunk)
         
-        # Step 4: Use Gemini for complex understanding if available
         if self.gemini_client and self._needs_gemini_analysis(file_path, ocr_text):
             analysis = self._analyze_with_gemini(file_path, ocr_text)
             if analysis:
@@ -96,7 +82,6 @@ class ImageProcessor(BaseProcessor):
                 )
                 chunks.append(chunk)
         
-        # Step 5: If no text found, add placeholder with basic info
         if not chunks:
             basic_info = self._get_basic_image_info(file_path)
             chunk = Chunk(
@@ -111,23 +96,17 @@ class ImageProcessor(BaseProcessor):
         return chunks
     
     def _preprocess_image(self, image_path: str) -> str:
-        """Preprocess image for better OCR results"""
         try:
-            # Read image
             img = cv2.imread(image_path)
             if img is None:
                 return image_path
             
-            # Convert to grayscale
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
-            # Apply thresholding to preprocess the image
             gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
             
-            # Apply median blur to remove noise
             gray = cv2.medianBlur(gray, 3)
             
-            # Save preprocessed image
             preprocessed_path = image_path.replace('.', '_preprocessed.')
             cv2.imwrite(preprocessed_path, gray)
             
@@ -142,7 +121,6 @@ class ImageProcessor(BaseProcessor):
         
         all_text = []
         
-        # Method 1: EasyOCR
         if self.ocr_engine and self.ocr_engine.is_available():
             try:
                 text = self.ocr_engine.extract_text(image_path)
@@ -151,7 +129,6 @@ class ImageProcessor(BaseProcessor):
             except Exception as e:
                 st.warning(f"EasyOCR failed: {str(e)}")
         
-        # Method 2: Tesseract
         if hasattr(self, 'use_tesseract') and self.use_tesseract:
             try:
                 # Try different Tesseract configurations
@@ -174,7 +151,6 @@ class ImageProcessor(BaseProcessor):
             except Exception as e:
                 st.warning(f"Tesseract failed: {str(e)}")
         
-        # Combine all unique text
         combined = '\n'.join(all_text)
         return combined
     
@@ -184,12 +160,10 @@ class ImageProcessor(BaseProcessor):
             img = Image.open(image_path)
             metadata = []
             
-            # Basic info
             metadata.append(f"Format: {img.format}")
             metadata.append(f"Size: {img.size[0]} x {img.size[1]} pixels")
             metadata.append(f"Mode: {img.mode}")
             
-            # EXIF data if available
             if hasattr(img, '_getexif') and img._getexif():
                 exif = img._getexif()
                 if exif:
@@ -211,17 +185,14 @@ class ImageProcessor(BaseProcessor):
     def _needs_gemini_analysis(self, file_path: str, ocr_text: str) -> bool:
         """Determine if image needs Gemini analysis"""
         
-        # If no text found, might need analysis
         if len(ocr_text) < 50:
             return True
         
-        # Check for keywords suggesting complex content
         complex_keywords = ['diagram', 'chart', 'graph', 'figure', 'screenshot', 
                            'table', 'flowchart', 'map', 'illustration']
         if any(keyword in ocr_text.lower() for keyword in complex_keywords):
             return True
         
-        # Check image size - large images might be complex
         try:
             img = Image.open(file_path)
             if img.size[0] * img.size[1] > 1000000:  # > 1MP
@@ -232,7 +203,6 @@ class ImageProcessor(BaseProcessor):
         return False
     
     def _analyze_with_gemini(self, file_path: str, ocr_text: str) -> str:
-        """Analyze image with Gemini Vision"""
         try:
             from PIL import Image
             
